@@ -41,37 +41,125 @@
     <h2 style="margin-top: 0; color: #333;">Get Started</h2>
     <p style="color: #666; font-size: 14px;">Sign up to receive a personalized character call for your child.</p>
     
-    <form onsubmit="return false;" style="display: flex; flex-direction: column; gap: 15px;">
+    <form id="signup-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 15px;">
         <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 500;">Parent/Guardian Phone Number *</label>
-            <input type="tel" placeholder="(555) 123-4567" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <input id="phone-input" type="tel" placeholder="(555) 123-4567" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
         </div>
-        
+
         <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 500;">Child's First Name *</label>
-            <input type="text" placeholder="Emma" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <input id="name-input" type="text" placeholder="Emma" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
         </div>
-        
+
         <div>
             <label style="display: block; margin-bottom: 5px; font-weight: 500;">Child's Age *</label>
-            <input type="number" placeholder="6" min="2" max="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <input id="age-input" type="number" placeholder="6" min="2" max="12" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
         </div>
-        
+
         <div style="margin-top: 10px;">
             <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #555; cursor: pointer;">
-                <input type="checkbox" style="margin-top: 3px;">
+                <input id="consent-checkbox" type="checkbox" style="margin-top: 3px;">
                 <span>I consent to receive SMS messages from Wish and Well LLC regarding scheduling and notifications for character calls. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe, HELP for help.</span>
             </label>
         </div>
-        
-        <button type="submit" style="background: #0d9488; color: white; padding: 12px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px;">
+
+        <p id="error-message" style="color: #dc2626; font-size: 13px; margin: 0; display: none;"></p>
+
+        <button type="button" onclick="submitForm()" style="background: #0d9488; color: white; padding: 12px 20px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-top: 10px;">
             Sign Up
         </button>
-        
+
         <p style="font-size: 12px; color: #888; margin: 10px 0 0 0;">
             By signing up, you agree to our <a href="/privacy-policy.html" style="color: #0d9488;">Privacy Policy</a> and <a href="/terms-of-service.html" style="color: #0d9488;">Terms of Service</a>.
         </p>
     </form>
+
+    <div id="success-message" style="display: none; text-align: center; padding: 20px 0;">
+        <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+        <h3 style="color: #0d9488; margin: 0 0 15px 0;">You're All Set!</h3>
+        <p style="color: #555; margin-bottom: 20px;">
+            We've received your signup for <strong id="child-name-display"></strong>.
+            You'll receive a text message soon with details about scheduling your character call.
+        </p>
+        <button onclick="resetForm()" style="background: transparent; color: #0d9488; padding: 10px 20px; border: 2px solid #0d9488; border-radius: 4px; font-size: 14px; cursor: pointer;">
+            Sign Up Another Child
+        </button>
+    </div>
 </section>
+
+<script>
+function showError(input, message) {
+    const errorEl = document.getElementById('error-message');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    if (input) {
+        input.style.borderColor = '#dc2626';
+        input.focus();
+    }
+}
+
+function clearErrors() {
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('phone-input').style.borderColor = '#ddd';
+    document.getElementById('name-input').style.borderColor = '#ddd';
+    document.getElementById('age-input').style.borderColor = '#ddd';
+}
+
+function validateForm() {
+    clearErrors();
+
+    const phone = document.getElementById('phone-input');
+    const name = document.getElementById('name-input');
+    const age = document.getElementById('age-input');
+    const consent = document.getElementById('consent-checkbox');
+
+    // Validate phone (at least 10 digits)
+    const phoneDigits = phone.value.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+        showError(phone, 'Please enter a valid phone number with at least 10 digits.');
+        return false;
+    }
+
+    // Validate name (not empty)
+    if (!name.value.trim()) {
+        showError(name, 'Please enter your child\'s first name.');
+        return false;
+    }
+
+    // Validate age (2-12)
+    const ageValue = parseInt(age.value, 10);
+    if (isNaN(ageValue) || ageValue < 2 || ageValue > 12) {
+        showError(age, 'Please enter an age between 2 and 12.');
+        return false;
+    }
+
+    // Validate consent checkbox
+    if (!consent.checked) {
+        showError(null, 'Please consent to receive SMS messages to continue.');
+        return false;
+    }
+
+    return true;
+}
+
+function submitForm() {
+    if (!validateForm()) {
+        return;
+    }
+
+    const childName = document.getElementById('name-input').value.trim();
+    document.getElementById('child-name-display').textContent = childName;
+    document.getElementById('signup-form').style.display = 'none';
+    document.getElementById('success-message').style.display = 'block';
+}
+
+function resetForm() {
+    document.getElementById('signup-form').reset();
+    clearErrors();
+    document.getElementById('signup-form').style.display = 'flex';
+    document.getElementById('success-message').style.display = 'none';
+}
+</script>
 </body>
 </html>
